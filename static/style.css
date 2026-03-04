@@ -1,0 +1,12 @@
+body{
+font-family: Arial;
+}
+
+.card{
+border-radius:10px;
+}
+
+#status{
+font-size:18px;
+padding:6px 12px;
+}
