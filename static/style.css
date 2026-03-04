@@ -46,6 +46,13 @@ background:#1e293b;
 transform:scale(1.03);
 }
 
+.scan-btn:disabled{
+background:#cbd5e1;
+color:#94a3b8;
+cursor:not-allowed;
+transform:scale(1);
+}
+
 /* Detection result */
 
 .status-box{
@@ -88,6 +95,7 @@ color:white;
 
 .dark .upload-card{
 background:#1e293b;
+color: white;
 }
 
 .dark table{
@@ -96,6 +104,18 @@ color:white;
 
 .dark .status-box{
 background:#334155;
+
+}
+
+.dark #fileInput{
+color:white;
+background-color:#334155;
+border-color:#475569;
+}
+
+.dark #fileInput.file-selected{
+border-color:#22c55e;
+background-color:#1e3a1f;
 }
 
 /* Toggle */

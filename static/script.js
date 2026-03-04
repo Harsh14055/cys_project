@@ -1,5 +1,16 @@
 document.getElementById("scanBtn").addEventListener("click", scanFile);
 
+// Disable scan button by default and enable when file is selected
+document.getElementById("scanBtn").disabled = true;
+
+document.getElementById("fileInput").addEventListener("change", function(){
+if(this.files.length > 0){
+document.getElementById("scanBtn").disabled = false;
+}else{
+document.getElementById("scanBtn").disabled = true;
+}
+});
+
 let malwareCount = 0;
 let benignCount = 0;
 let unknownCount = 0;
@@ -110,6 +121,7 @@ logs.appendChild(li);
 addHistory(data.file_name,data.status);
 
 fileInput.value="";
+document.getElementById("scanBtn").disabled = true;
 }
 
 function addHistory(file,status){
