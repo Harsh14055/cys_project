@@ -1,72 +1,39 @@
-import os
-import hashlib
-import csv
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import LabelEncoder
+import pickle
 
-import os
-import hashlib
-import csv
+# Load dataset
+data = pd.read_csv("malware_dataset.csv")
 
-# Get current script directory
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+# Remove hash column
+data = data.drop("hash", axis=1)
 
-BASE_DIR = os.path.join(CURRENT_DIR, "..", "samples")
-MALWARE_DIR = os.path.join(BASE_DIR, "malware")
-BENIGN_DIR = os.path.join(BASE_DIR, "benign")
+# Target column
+y = data["classification"]
 
-OUTPUT_FILE = os.path.join(CURRENT_DIR, "signatures.csv")
+# Encode labels
+encoder = LabelEncoder()
+y = encoder.fit_transform(y)
 
+# Features
+X = data.drop("classification", axis=1)
 
-def calculate_hash(file_path):
+# Train test split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
-    sha256 = hashlib.sha256()
+# Train model
+model = RandomForestClassifier(n_estimators=200, random_state=42)
+model.fit(X_train, y_train)
 
-    with open(file_path, "rb") as f:
+# Accuracy
+print("Accuracy:", model.score(X_test, y_test))
 
-        while True:
-            chunk = f.read(4096)
+# Save model
+with open("ml_model.pkl", "wb") as f:
+    pickle.dump(model, f)
 
-            if not chunk:
-                break
-
-            sha256.update(chunk)
-
-    return sha256.hexdigest()
-
-
-def create_signature_database():
-
-    signatures = []
-
-    for filename in os.listdir(MALWARE_DIR):
-
-        path = os.path.join(MALWARE_DIR, filename)
-
-        if os.path.isfile(path):
-
-            file_hash = calculate_hash(path)
-
-            signatures.append([filename, file_hash, "malware"])
-
-    for filename in os.listdir(BENIGN_DIR):
-
-        path = os.path.join(BENIGN_DIR, filename)
-
-        if os.path.isfile(path):
-
-            file_hash = calculate_hash(path)
-
-            signatures.append([filename, file_hash, "benign"])
-
-    with open(OUTPUT_FILE, "w", newline="") as f:
-
-        writer = csv.writer(f)
-
-        writer.writerow(["filename", "sha256", "type"])
-
-        writer.writerows(signatures)
-
-    print("Signature database generated successfully")
-
-
-if __name__ == "__main__":
-    create_signature_database()
+print("Model saved successfully")
