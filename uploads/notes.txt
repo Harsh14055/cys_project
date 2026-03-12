@@ -1,0 +1,7 @@
+Cybersecurity Project Notes
+
+This project demonstrates malware detection using machine learning.
+
+The system uploads a file, extracts behavioral features, and predicts whether the file is malicious or benign.
+
+Random Forest classifier is used for detection.

@@ -1,21 +1,22 @@
 import os
 import hashlib
+import time
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 
-from scanner_engine import load_signatures, check_signature
-
-UPLOAD_FOLDER = "uploads"
+from scanner_engine import scan_file
 
 app = Flask(__name__)
 CORS(app)
 
+UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-signatures = load_signatures()
 
 
 def generate_hashes(file_path):
+    """
+    Generate MD5 and SHA256 hash of uploaded file
+    """
 
     md5 = hashlib.md5()
     sha256 = hashlib.sha256()
@@ -32,14 +33,13 @@ def generate_hashes(file_path):
     return md5.hexdigest(), sha256.hexdigest()
 
 
-# ✅ Serve the UI
 @app.route("/")
 def home():
     return render_template("index.html")
 
 
 @app.route("/scan-file", methods=["POST"])
-def scan_file():
+def scan_file_endpoint():
 
     logs = []
 
@@ -48,33 +48,53 @@ def scan_file():
 
     file = request.files["file"]
 
-    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+    if file.filename == "":
+        return jsonify({"error": "No file selected"}), 400
 
+    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
     file.save(file_path)
 
-    logs.append("File uploaded successfully")
-    logs.append("Generating hashes")
+    logs.append("✓ File uploaded successfully")
+    logs.append("🔍 Generating cryptographic hashes...")
 
     md5_hash, sha256_hash = generate_hashes(file_path)
 
-    logs.append("Checking signature database")
+    logs.append(f"MD5 generated: {md5_hash[:10]}...")
+    logs.append(f"SHA256 generated: {sha256_hash[:10]}...")
 
-    is_match, filename, file_type = check_signature(sha256_hash, signatures)
+    logs.append("⚙ Running machine learning detection...")
 
-    if is_match:
-        status = "Malicious" if file_type == "malware" else "Benign"
+    # simulate scan delay for better UI experience
+    time.sleep(1.5)
+
+    # Run ML detection
+    result = scan_file(file_path)
+
+    verdict = result["verdict"]
+    confidence = result["confidence"]
+
+    logs.append(f"Prediction: {verdict}")
+    logs.append(f"Confidence: {round(confidence * 100, 2)}%")
+
+    # Convert verdict to UI format
+    if verdict == "malicious":
+        status = "Malicious"
+    elif verdict == "benign":
+        status = "Benign"
     else:
         status = "Unknown"
 
-    logs.append("Detection completed")
+    logs.append("✓ Detection completed")
 
-    return jsonify({
+    response = {
         "file_name": file.filename,
         "md5": md5_hash,
         "sha256": sha256_hash,
         "status": status,
         "logs": logs
-    })
+    }
+
+    return jsonify(response)
 
 
 if __name__ == "__main__":

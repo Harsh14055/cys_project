@@ -1,0 +1,5 @@
+Hello world
+
+This is a normal file used to test the malware detection system.
+
+It contains regular text and no suspicious commands.

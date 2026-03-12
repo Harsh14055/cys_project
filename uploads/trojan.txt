@@ -1,0 +1,9 @@
+cmd.exe
+powershell -ExecutionPolicy bypass
+VirtualAllocEx
+CreateRemoteThread
+WriteProcessMemory
+LoadLibrary
+GetProcAddress
+
+This program tries to execute suspicious commands.
